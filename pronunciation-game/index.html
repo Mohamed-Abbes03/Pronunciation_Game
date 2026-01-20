@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Pronunciation Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url("background.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white;
+            text-align: center;
+            padding: 40px;
+            animation: bgMove 20s infinite alternate ease-in-out;
+        }
+
+        @keyframes bgMove {
+            from { background-position: center top; }
+            to { background-position: center bottom; }
+        }
+
+        /* Dark overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: -1;
+        }
+
+        /* GLASS CONTAINER (Same background as body) */
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: white;
+            width: 70%;
+            margin: auto;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0px 0px 30px rgba(0,0,0,0.5);
+            animation: float 4s infinite ease-in-out, borderGlow 3s infinite alternate;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes borderGlow {
+            from { box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+            to { box-shadow: 0 0 25px rgba(0, 150, 255, 0.9); }
+        }
+
+        .logo {
+            width: 180px;
+            margin-bottom: 10px;
+            animation: logoPop 1.2s ease-in-out;
+        }
+
+        @keyframes logoPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .word-box {
+            font-size: 55px;
+            font-weight: bold;
+            margin: 20px;
+            padding: 20px 40px;
+            border: 3px solid rgba(255,255,255,0.6);
+            border-radius: 15px;
+            display: inline-block;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(6px);
+            animation: pulseGlow 2s infinite;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px cyan; }
+            50% { box-shadow: 0 0 20px cyan; }
+            100% { box-shadow: 0 0 5px cyan; }
+        }
+
+        .correct {
+            animation: bounce 0.8s;
+            border-color: #28a745;
+            box-shadow: 0 0 25px #28a745;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            30% { transform: translateY(-12px); }
+            50% { transform: translateY(0); }
+            70% { transform: translateY(-6px); }
+            100% { transform: translateY(0); }
+        }
+
+        .wrong {
+            animation: shake 0.5s;
+            border-color: #dc3545;
+            box-shadow: 0 0 25px #dc3545;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            75% { transform: translateX(-6px); }
+            100% { transform: translateX(0); }
+        }
+
+        .btn {
+            padding: 12px 22px;
+            font-size: 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: rgba(255,255,255,0.3);
+            transition: 0.4s;
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: scale(1.12);
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        .speak-btn { background: #28a745; color: white; }
+        .next-btn { background: #007bff; color: white; }
+        .level-btn { background: #ffc107; color: black; }
+
+        .feedback {
+            font-size: 20px;
+            margin-top: 10px;
+            min-height: 30px;
+        }
+
+        .score-box, .level-box {
+            font-size: 20px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .footer {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <img src="logo.png" class="logo" alt="Harvest British College Logo">
+
+    <h2>🎮 Advanced Pronunciation Challenge</h2>
+
+    <h3>Say this word:</h3>
+    <div class="word-box" id="word">READY</div>
+
+    <br>
+
+    <button class="btn speak-btn" onclick="startListening()">🎤 Speak</button>
+    <button class="btn next-btn" onclick="nextWord()">➡️ Next Word</button>
+
+    <br><br>
+
+    <button class="btn level-btn" onclick="setLevel('easy')">Easy</button>
+    <button class="btn level-btn" onclick="setLevel('medium')">Medium</button>
+    <button class="btn level-btn" onclick="setLevel('hard')">Hard</button>
+    <button class="btn level-btn" onclick="setLevel('master')">Master</button>
+
+    <p><b>Your Speech:</b> <span id="studentText"></span></p>
+    <p class="feedback"><b>Feedback:</b> <span id="feedback"></span></p>
+
+    <div class="score-box">Score: <span id="score">0</span></div>
+    <div class="level-box">Current Level: <span id="level">Easy</span></div>
+
+    <div class="footer">Harvest British College — AI English Game</div>
+</div>
+
+<script>
+const wordBank = {
+easy: [
+"cat","dog","sun","ball","tree","book","pen","cup","fish","bird",
+"car","bus","bed","door","hat","shoe","apple","banana","milk","bread",
+"hand","face","nose","ear","eye","leg","arm","jump","run","sit",
+"stand","walk","talk","play","draw","read","write","sing","rain","snow",
+"wind","cloud","star","moon","day","night","red","blue","green","yellow",
+"big","small","hot","cold","happy","sad","fast","slow","open","close"
+],
+
+medium: [
+"school","teacher","student","computer","window","garden","library","kitchen","bedroom","hospital",
+"doctor","nurse","market","restaurant","airport","station","music","guitar","piano","dance",
+"picture","camera","video","movie","family","father","mother","brother","sister","friend",
+"breakfast","lunch","dinner","orange","chicken","water","coffee","science","math","english",
+"history","country","city","street","building","bridge","mountain","river","ocean","island",
+"travel","holiday","summer","winter","spring","autumn","rainbow","animal","elephant","dolphin"
+],
+
+hard: [
+"through","thought","though","enough","beautiful","daughter","psychology","character","knowledge","comfortable",
+"vegetable","chocolate","temperature","architecture","environment","imagination","education","information","communication","celebration",
+"international","technology","development","government","management","relationship","friendship","leadership","membership","partnership",
+"adventure","mysterious","dangerous","scientific","electricity","experiment","laboratory","dictionary","translation","pronunciation",
+"generation","population","pollution","recycling","renewable","sustainable","community","committee","conversation","presentation",
+"competition","innovation","creativity","responsibility","improvement","achievement","confidence","motivation","performance","practice"
+],
+
+master: [
+"entrepreneur","phenomenon","synchronization","misinterpretation","counterproductive","infrastructure","constitutional","multidimensional","interdisciplinary","transformation",
+"responsibility","incompatibility","hypercommunication","electromagnetism","neurotransmitter","decentralization","implementation","globalization","institutionalization","industrialization",
+"deconstruction","reconstruction","authentication","personalization","customization","visualization","internationalization","interoperability","sustainability","accountability",
+"biotechnology","nanotechnology","microarchitecture","superconductivity","thermodynamics","neuroscience","cognitivebehavior","environmentalism","philosophical","epistemology",
+"metamorphosis","incomprehensible","counterintuitive","extraterrestrial","intercontinental","multiculturalism","intergenerational","transcontinental","multilingualism","anthropological",
+"miscommunication","overgeneralization","conceptualization","contextualization","reconceptualization","reinterpretation","supercalifragilistic","hippopotomonstrosesquipedaliophobia"
+]
+};
+
+let currentLevel = "easy";
+let targetWord = "";
+let score = 0;
+
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = "en-US";
+
+function setLevel(level) {
+    currentLevel = level;
+    document.getElementById("level").innerText =
+        level.charAt(0).toUpperCase() + level.slice(1);
+    nextWord();
+}
+
+function nextWord() {
+    let words = wordBank[currentLevel];
+    targetWord = words[Math.floor(Math.random() * words.length)];
+    document.getElementById("word").innerText = targetWord.toUpperCase();
+    document.getElementById("studentText").innerText = "";
+    document.getElementById("feedback").innerText = "";
+    document.getElementById("word").classList.remove("correct","wrong");
+}
+
+function startListening() {
+    recognition.start();
+}
+
+recognition.onresult = function(event) {
+    let studentSpeech = event.results[0][0].transcript.toLowerCase();
+    document.getElementById("studentText").innerText = studentSpeech;
+
+    let wordBox = document.getElementById("word");
+
+    if (studentSpeech.includes(targetWord.toLowerCase())) {
+        document.getElementById("feedback").innerText = "✅ Excellent pronunciation!";
+        score += 1;
+        document.getElementById("score").innerText = score;
+
+        wordBox.classList.add("correct");
+
+        let speech = new SpeechSynthesisUtterance(targetWord);
+        speech.lang = "en-US";
+        window.speechSynthesis.speak(speech);
+
+    } else {
+        document.getElementById("feedback").innerText =
+            "⚠️ Try again. Listen and repeat.";
+
+        wordBox.classList.add("wrong");
+
+        let speech = new SpeechSynthesisUtterance(targetWord);
+        speech.lang = "en-US";
+        window.speechSynthesis.speak(speech);
+    }
+};
+</script>
+
+</body>
+</html>
